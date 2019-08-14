@@ -1,0 +1,21 @@
+.Weather {
+  border: 2px solid black;
+  width: 1000px;
+  height: 500px;
+  margin: auto auto;
+  display: grid;
+  grid-template-rows: 50px 50px 1fr 2fr
+}
+
+.Input {
+  border: 2px solid red;
+}
+
+.Location {
+  border: 2px solid green;
+}
+
+.Today {
+  border: 2px solid blue;
+  display: grid;
+}
