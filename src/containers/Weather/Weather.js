@@ -7,20 +7,29 @@ const api = "2750fd418f0d3b15295bfd66db4f197c";
 // http://openweathermap.org/img/wn/10d@2x.png
 
 class Weather extends Component {
-  state = {
-    name: "",
-    todayTemp: null,
-    todayIcon: null,
-    city: "",
-    country: ""
+  constructor(props) {
+    super(props)
+    this.state = {
+      name: "",
+      todayTemp: null,
+      todayIcon: null,
+      city: "",
+      country: "",
+    }
+    this.baseState = this.state
   }
+  
 
   handleChange = (event) => {
     this.setState({ [event.target.name]: event.target.value })
   }
 
   callApi = () => {
-    let url = `http://api.openweathermap.org/data/2.5/weather?q=${this.state.city},${this.state.country}&units=imperial&appid=` + api
+    let country = "US";
+    if (this.state.country !== "") {
+      country = this.state.country
+    }
+    let url = `http://api.openweathermap.org/data/2.5/weather?q=${this.state.city},${country}&units=imperial&appid=` + api
     Axios.get(url)
       .then( response => {
         console.log(response["data"])
@@ -32,12 +41,14 @@ class Weather extends Component {
         }
         this.setState({ name, todayTemp: temp, todayIcon: icon })
       })
-      .catch( err => console.log(err))
+      .catch( err => {
+        console.log(err)
+      })
   }
 
   handleSubmit = (event) => {
     this.callApi();
-    this.setState({ city: "", country: "" })
+    this.setState( this.baseState )
     event.preventDefault();
   }
 
