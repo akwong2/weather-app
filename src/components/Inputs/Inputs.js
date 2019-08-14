@@ -9,7 +9,8 @@ const inputs = (props) => {
           value={props.city} 
           name="city"
           placeholder="City"
-          onChange={props.change} />
+          onChange={props.change}
+          required />
         <input 
           type="text"
           value={props.country}
