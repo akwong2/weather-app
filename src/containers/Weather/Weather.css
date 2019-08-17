@@ -18,4 +18,32 @@
 .Today {
   border: 2px solid blue;
   display: grid;
+  margin: auto;
+}
+
+.Future {
+  border: 2px solid yellow;
+  display: grid;
+  grid-template-rows: 2fr 1fr
+}
+
+.Highlight {
+  border: 2px solid purple;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr)
+}
+
+.Highlight > div {
+  border: 2px solid peachpuff;
+  display: grid;
+  text-align: center;
+}
+
+.Highlight > div > img {
+  border: 2px solid black;
+  margin: auto;
+}
+
+.Hourly {
+  border: 2px solid pink;
 }

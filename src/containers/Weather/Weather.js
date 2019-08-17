@@ -13,8 +13,11 @@ class Weather extends Component {
       name: "",
       todayTemp: null,
       todayIcon: null,
+      todayDate: null,
       city: "",
       country: "",
+      forecast: {},
+      forecastOrder: []
     }
     this.baseState = this.state
   }
@@ -29,17 +32,54 @@ class Weather extends Component {
     if (this.state.country !== "") {
       country = this.state.country
     }
-    let url = `http://api.openweathermap.org/data/2.5/weather?q=${this.state.city},${country}&units=imperial&appid=` + api
-    Axios.get(url)
+    let weatherUrl = `http://api.openweathermap.org/data/2.5/weather?q=${this.state.city},${country}&units=imperial&appid=` + api
+    Axios.get(weatherUrl)
       .then( response => {
         console.log(response["data"])
         let name = `${response["data"]["name"]}, ${response["data"]["sys"]["country"]}`
         let temp = response["data"]["main"]["temp"];
-        let icon;
-        for (let i of response["data"]["weather"]) {
-          icon = `http://openweathermap.org/img/wn/${i["icon"]}@2x.png `
+        let icon = `http://openweathermap.org/img/wn/${response["data"]["weather"][0]["icon"]}@2x.png`;
+        let date = new Date();
+        let today = `${date.getMonth()+1}/${date.getDate()}`
+        this.setState({ name, todayTemp: temp, todayIcon: icon, todayDate: today })
+      })
+      .catch( err => {
+        console.log(err)
+      })
+    let forecastUrl = `http://api.openweathermap.org/data/2.5/forecast?q=${this.state.city},${country}&units=imperial&appid=` + api
+    Axios.get(forecastUrl)
+      .then( response => {
+        let forecast = {};
+        let forecastOrder = [];
+        for (let i in response["data"]["list"]) {
+          let entry = response["data"]["list"][i]
+          let date = new Date(entry["dt_txt"])
+          let newDate = `${date.getMonth()+1}/${date.getDate()}`;
+          if (forecast[newDate]) {
+            forecast[newDate]["hourly"].push({
+              "time": entry["dt_txt"],
+              "temp": entry["main"]["temp"],
+              "icon": entry["weather"][0]["icon"],
+              "iconUrl": `http://openweathermap.org/img/wn/${entry["weather"][0]["icon"]}@2x.png`
+            })
+          }
+          else {
+            forecast[newDate] = {
+              "date": newDate,
+              "hourly": [{
+                "time": entry["dt_txt"],
+                "temp": entry["main"]["temp"],
+                "icon": entry["weather"][0]["icon"],
+                "iconUrl": `http://openweathermap.org/img/wn/${entry["weather"][0]["icon"]}@2x.png`
+              }]
+            }
+            forecastOrder.push(newDate)
+          }
+
         }
-        this.setState({ name, todayTemp: temp, todayIcon: icon })
+        console.log(forecastOrder)
+        console.log(forecast)
+        this.setState({ forecast, forecastOrder })
       })
       .catch( err => {
         console.log(err)
@@ -52,11 +92,14 @@ class Weather extends Component {
     event.preventDefault();
   }
 
+
+
   render() {
     let icon;
     if (this.state.todayIcon !== null) {
       icon = <img src={this.state.todayIcon} alt="today"></img>
     }
+
     return (
       <div className={"Weather"}>
         <Inputs 
@@ -68,10 +111,19 @@ class Weather extends Component {
           {this.state.name}
         </div>
         <div className={"Today"}>
+          {this.state.todayDate}
           {icon}
           {this.state.todayTemp}
         </div>
         <div className="Future">
+          <div className="Highlight">{this.state.forecastOrder.map( (item, i) => {
+            return <div key={i}>
+                    {this.state.forecast[item]["date"]}
+                    {<img src={this.state.forecast[item]["hourly"][0]["iconUrl"]} alt={"image" + item} />}
+                    {this.state.forecast[item]["hourly"][0]["temp"]}
+                  </div>
+          })}</div>
+          <div className="Hourly"></div>
         </div>
       </div>
     )
