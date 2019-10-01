@@ -14,18 +14,28 @@ class Weather extends Component {
       todayTemp: null,
       todayIcon: null,
       todayDate: null,
-      todayTime: null,
       city: "",
       country: "",
       forecast: {},
-      forecastOrder: []
+      forecastOrder: [],
+      forecastHighlight: []
     }
     this.baseState = this.state
   }
   
-
   handleChange = (event) => {
     this.setState({ [event.target.name]: event.target.value })
+  }
+
+  timeFrame = (time) => {
+    if (0 <= time && time < 3) return 0;
+    else if (3 <= time && time < 6) return 3;
+    else if (6 <= time && time < 9) return 6;
+    else if (9 <= time && time < 12) return 9;
+    else if (12 <= time && time < 15) return 12;
+    else if (15 <= time && time < 18) return 15;
+    else if (18 <= time && time < 21) return 18;
+    else if (21 <= time && time < 24) return 21;
   }
 
   callApi = () => {
@@ -52,9 +62,10 @@ class Weather extends Component {
       .then( response => {
         let forecast = {};
         let forecastOrder = [];
+        let forecastHighlight = [];
         let today = new Date();
-        let time = today.getHours();
-        let todayTime = Math.floor(time/3);
+        let time = this.timeFrame(today.getHours());
+        console.log(time);
         for (let i in response["data"]["list"]) {
           let entry = response["data"]["list"][i]
           let date = new Date(entry["dt_txt"])
@@ -77,13 +88,26 @@ class Weather extends Component {
                 "iconUrl": `http://openweathermap.org/img/wn/${entry["weather"][0]["icon"]}@2x.png`
               }]
             }
-            forecastOrder.push(newDate)
+            //forecastOrder.push(newDate)
           }
-
+          let d = new Date(entry["dt_txt"]);
+          if (d.getHours() === time) {
+            forecastOrder.push(newDate)
+            forecastHighlight.push(
+              {
+                "date": newDate,
+                "time": entry["dt_txt"],
+                "temp": entry["main"]["temp"],
+                "icon": entry["weather"][0]["icon"],
+                "iconUrl": `http://openweathermap.org/img/wn/${entry["weather"][0]["icon"]}@2x.png`
+              }
+            )
+          };
         }
         console.log(forecastOrder)
         console.log(forecast)
-        this.setState({ forecast, forecastOrder, todayTime })
+        console.log(forecastHighlight);
+        this.setState({ forecast, forecastOrder, forecastHighlight })
       })
       .catch( err => {
         console.log(err)
@@ -122,12 +146,12 @@ class Weather extends Component {
           {this.state.todayTemp}
         </div>
         <div className="Future">
-          <div className="Highlight">{this.state.forecastOrder.map( (item, i) => {
-            return <div key={i}>
-                      {this.state.forecast[item]["date"]}
-                      {<img src={this.state.forecast[item]["hourly"][this.state.todayTime]["iconUrl"]} alt={item} />}
-                      {this.state.forecast[item]["hourly"][this.state.todayTime]["temp"]}
-                  </div>
+          <div className="Highlight">{this.state.forecastHighlight.map( (item, i) => {
+            return  <div key={i}>
+                      {item["date"]}
+                      {<img src={item["iconUrl"]} alt={"image" + item["date"]}></img>}
+                      {item["temp"]}
+                    </div>
           })}</div>
           <div className="Hourly"></div>
         </div>
