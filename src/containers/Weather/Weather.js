@@ -14,6 +14,7 @@ class Weather extends Component {
       todayTemp: null,
       todayIcon: null,
       todayDate: null,
+      todayTime: null,
       city: "",
       country: "",
       forecast: {},
@@ -51,6 +52,9 @@ class Weather extends Component {
       .then( response => {
         let forecast = {};
         let forecastOrder = [];
+        let today = new Date();
+        let time = today.getHours();
+        let todayTime = Math.floor(time/3);
         for (let i in response["data"]["list"]) {
           let entry = response["data"]["list"][i]
           let date = new Date(entry["dt_txt"])
@@ -79,7 +83,7 @@ class Weather extends Component {
         }
         console.log(forecastOrder)
         console.log(forecast)
-        this.setState({ forecast, forecastOrder })
+        this.setState({ forecast, forecastOrder, todayTime })
       })
       .catch( err => {
         console.log(err)
@@ -92,7 +96,9 @@ class Weather extends Component {
     event.preventDefault();
   }
 
-
+  handleClick = (event) => {
+    console.log(event.target)
+  }
 
   render() {
     let icon;
@@ -118,9 +124,9 @@ class Weather extends Component {
         <div className="Future">
           <div className="Highlight">{this.state.forecastOrder.map( (item, i) => {
             return <div key={i}>
-                    {this.state.forecast[item]["date"]}
-                    {<img src={this.state.forecast[item]["hourly"][0]["iconUrl"]} alt={"image" + item} />}
-                    {this.state.forecast[item]["hourly"][0]["temp"]}
+                      {this.state.forecast[item]["date"]}
+                      {<img src={this.state.forecast[item]["hourly"][this.state.todayTime]["iconUrl"]} alt={item} />}
+                      {this.state.forecast[item]["hourly"][this.state.todayTime]["temp"]}
                   </div>
           })}</div>
           <div className="Hourly"></div>
